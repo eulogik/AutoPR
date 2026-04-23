@@ -1,6 +1,9 @@
 name: "Eulogik-AutoPR"
 description: "AI-powered PR description generator and code reviewer using OpenRouter LLMs"
 author: "AutoPR"
+branding:
+  icon: "git-pull-request"
+  color: "purple"
 
 inputs:
   openrouter_api_key:
