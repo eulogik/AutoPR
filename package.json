@@ -1,6 +1,6 @@
 {
   "name": "@eulogik/autopr",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "CLI tool and GitHub Action that auto-generates PR descriptions and reviews code using small LLMs via OpenRouter",
   "type": "module",
   "bin": {
@@ -14,7 +14,14 @@
     "prepare": "npm run build",
     "dev": "tsc --watch"
   },
-  "keywords": ["git", "pr", "github", "llm", "openrouter", "code-review"],
+  "keywords": [
+    "git",
+    "pr",
+    "github",
+    "llm",
+    "openrouter",
+    "code-review"
+  ],
   "author": "AutoPR",
   "license": "MIT",
   "dependencies": {
@@ -32,5 +39,8 @@
   "engines": {
     "node": ">=20.0.0"
   },
-  "files": ["dist", "src/prompts"]
+  "files": [
+    "dist",
+    "src/prompts"
+  ]
 }
