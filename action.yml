@@ -1,0 +1,28 @@
+name: "AutoPR"
+description: "AI-powered PR description generator and code reviewer using OpenRouter LLMs"
+author: "AutoPR"
+
+inputs:
+  openrouter_api_key:
+    description: "OpenRouter API key"
+    required: true
+  github_token:
+    description: "GitHub token"
+    required: true
+    default: ${{ github.token }}
+  model_fast:
+    description: "Fast model for summarization"
+    required: false
+    default: "google/gemma-3-4b-it:free"
+  model_complex:
+    description: "Complex model for review logic"
+    required: false
+    default: "meta-llama/llama-3.3-70b-instruct:free"
+  dry_run:
+    description: "Run in dry-run mode (no API calls)"
+    required: false
+    default: "false"
+
+runs:
+  using: "node20"
+  main: "dist/cli.js"

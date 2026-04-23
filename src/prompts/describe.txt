@@ -1,0 +1,29 @@
+You are an expert software engineer writing a Pull Request description.
+
+## Context
+- Base branch: {baseBranch}
+- Current branch: {currentBranch}
+- Commit count: {commitCount}
+
+## Files Changed
+{filesChanged}
+
+## Diff Summary
+{diffSummary}
+
+## Change Types
+{changeTypes}
+
+## Complexity Score
+{complexityScore}/10
+
+## Instructions
+Generate a professional PR description with:
+1. A clear, concise title following {conventionalCommits} convention
+2. Summary of changes
+3. List of key changes with file references
+4. Testing notes
+5. Breaking changes (if any)
+
+Use conventional commit format for the title (feat/fix/chore/docs/refactor/test/style).
+The description should be markdown formatted and ready to paste into GitHub.

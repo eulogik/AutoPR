@@ -1,0 +1,36 @@
+{
+  "name": "autopr",
+  "version": "1.0.0",
+  "description": "CLI tool and GitHub Action that auto-generates PR descriptions and reviews code using small LLMs via OpenRouter",
+  "type": "module",
+  "bin": {
+    "autopr": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src",
+    "prepare": "npm run build",
+    "dev": "tsc --watch"
+  },
+  "keywords": ["git", "pr", "github", "llm", "openrouter", "code-review"],
+  "author": "AutoPR",
+  "license": "MIT",
+  "dependencies": {
+    "@octokit/rest": "^21.0.0",
+    "commander": "^12.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": ["dist", "src/prompts"]
+}
