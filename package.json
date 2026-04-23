@@ -1,5 +1,5 @@
 {
-  "name": "autopr",
+  "name": "@eulogik/autopr",
   "version": "1.0.0",
   "description": "CLI tool and GitHub Action that auto-generates PR descriptions and reviews code using small LLMs via OpenRouter",
   "type": "module",
