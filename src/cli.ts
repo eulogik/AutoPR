@@ -22,12 +22,12 @@ function renderTemplate(template: string, variables: Record<string, string>): st
   return template.replace(/\{(\w+)\}/g, (_, key) => variables[key] ?? `{${key}}`);
 }
 
-async function generatePRDescription(config: AutoPRConfig): Promise<void> {
+async function generatePRDescription(config: AutoPRConfig, baseBranch: string = "main"): Promise<void> {
   const currentBranch = await getCurrentBranch();
   console.log(`Generating PR description for branch: ${currentBranch}`);
 
-  const diff = await getDiff("main", currentBranch);
-  const commits = await getCommitHistory("main");
+  const diff = await getDiff(baseBranch, currentBranch);
+  const commits = await getCommitHistory(baseBranch);
 
   const sanitizedDiff = sanitizeDiff(diff.diff);
   const filesChanged = diff.files.map((f) => `- ${f} (${diff.changeTypes[f]})`).join("\n");
@@ -38,7 +38,7 @@ async function generatePRDescription(config: AutoPRConfig): Promise<void> {
 
   const template = await loadPromptTemplate("describe");
   const prompt = renderTemplate(template, {
-    baseBranch: "main",
+    baseBranch,
     currentBranch,
     commitCount: commits.length.toString(),
     filesChanged,
@@ -96,6 +96,12 @@ async function generatePRDescription(config: AutoPRConfig): Promise<void> {
 
 async function reviewPR(prNumber: number, config: AutoPRConfig): Promise<void> {
   console.log(`Reviewing PR #${prNumber}`);
+
+  // Validate git repo
+  const { isGitRepo } = await import("./git.js");
+  if (!await isGitRepo()) {
+    throw new Error("Not a git repository. Please run AutoPR inside a git project.");
+  }
 
   if ((!config.api.githubToken || config.api.githubToken === "") && (!process.env.GITHUB_TOKEN || process.env.GITHUB_TOKEN === "")) {
     throw new Error("GitHub token required for review. Set GITHUB_TOKEN or api.githubToken in config.");
@@ -229,7 +235,7 @@ export async function main(argv: string[] = process.argv): Promise<void> {
     .action(async (options) => {
       const config = await loadConfig();
       config.dryRun = process.env.AUTOPR_DRY_RUN === "true";
-      await generatePRDescription(config);
+      await generatePRDescription(config, options.base);
     });
 
   program
@@ -255,6 +261,21 @@ export async function main(argv: string[] = process.argv): Promise<void> {
 
 // Run main when this is the main module
 main(process.argv).catch((error) => {
-  console.error("Error:", error instanceof Error ? error.message : String(error));
+  const message = error instanceof Error ? error.message : String(error);
+
+  // Check for common git-related errors
+  if (message.includes("Not a git repository") || message.includes("No commits found") || message.includes("Unable to determine current branch")) {
+    console.error("❌ Error:", message);
+    console.error("\n💡 Quick fix:");
+    console.error("  1. Initialize git: git init");
+    console.error("  2. Create a commit: git add . && git commit -m 'Initial commit'");
+    console.error("  3. Run AutoPR again!");
+  } else if (message.includes("Base branch")) {
+    console.error("❌ Error:", message);
+    console.error("\n💡 Tip: Check available branches with 'git branch -a'");
+  } else {
+    console.error("❌ Error:", message);
+  }
+
   process.exit(1);
 });

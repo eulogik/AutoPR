@@ -7,7 +7,7 @@
     "autopr": "./dist/cli.js"
   },
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r src/prompts dist/prompts",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint src",

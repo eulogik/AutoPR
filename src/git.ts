@@ -4,6 +4,24 @@ import { resolve } from "path";
 
 const execFileAsync = promisify(execFile);
 
+export async function isGitRepo(): Promise<boolean> {
+  try {
+    await execFileAsync("git", ["rev-parse", "--is-inside-work-tree"]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function hasCommits(): Promise<boolean> {
+  try {
+    const { stdout } = await execFileAsync("git", ["rev-parse", "--verify", "HEAD"]);
+    return stdout.trim() !== "";
+  } catch {
+    return false;
+  }
+}
+
 export interface GitDiff {
   files: string[];
   diff: string;
@@ -20,7 +38,19 @@ export interface CommitInfo {
 }
 
 export async function getDiff(baseBranch: string = "main", currentBranch?: string): Promise<GitDiff> {
+  // Validate git state
+  if (!await isGitRepo()) {
+    throw new Error("Not a git repository. Please run AutoPR inside a git project.");
+  }
+
   const branch = currentBranch && currentBranch !== "" ? currentBranch : await getCurrentBranch();
+
+  // Check if base branch exists
+  try {
+    await execFileAsync("git", ["rev-parse", "--verify", baseBranch]);
+  } catch {
+    throw new Error(`Base branch '${baseBranch}' not found. Try: autopr generate --base <your-base-branch>`);
+  }
 
   const { stdout: diffOutput } = await execFileAsync("git", [
     "diff",
@@ -74,8 +104,26 @@ export async function getDiff(baseBranch: string = "main", currentBranch?: strin
 }
 
 export async function getCurrentBranch(): Promise<string> {
-  const { stdout } = await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"]);
-  return stdout.trim();
+  const isRepo = await isGitRepo();
+  if (!isRepo) {
+    throw new Error("Not a git repository. Please run AutoPR inside a git project.");
+  }
+
+  try {
+    const { stdout } = await execFileAsync("git", ["rev-parse", "--abbrev-ref", "HEAD"]);
+    const branch = stdout.trim();
+
+    if (!branch || branch === "HEAD") {
+      throw new Error("No commits found. Please create at least one commit before running AutoPR.");
+    }
+
+    return branch;
+  } catch (error) {
+    if (error instanceof Error && error.message.includes("Not a git")) {
+      throw error;
+    }
+    throw new Error("Unable to determine current branch. Ensure you have commits in your repository.");
+  }
 }
 
 export async function getCommitHistory(baseBranch: string = "main", count: number = 10): Promise<CommitInfo[]> {
